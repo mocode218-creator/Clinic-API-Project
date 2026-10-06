@@ -1,3 +1,5 @@
 <Solution>
+  <Project Path="../Clinic_BuisnessLayer/Clinic_BuisnessLayer.csproj" />
+  <Project Path="../Clinic_DataAccess/Clinic_DataAccess.csproj" />
   <Project Path="Clinic API.csproj" />
 </Solution>
