@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="../Clinic_BuisnessLayer/Clinic_BuisnessLayer.csproj" />
+  <Project Path="../Clinic_BusinessLayer/Clinic_BusinessLayer.csproj" Id="3672bf04-8e84-4ad0-a26f-5342fb21265a" />
   <Project Path="../Clinic_DataAccess/Clinic_DataAccess.csproj" />
   <Project Path="Clinic API.csproj" />
 </Solution>

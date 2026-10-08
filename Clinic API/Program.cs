@@ -1,23 +1,54 @@
-var builder = WebApplication.CreateBuilder(args);
+using Clinic_DataAccess.Context;
+using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
+using Serilog;
 
-// Add services to the container.
+// 1. إعداد Serilog (قبل أي حاجة)
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File("logs/clinic-.log", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
 
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+try
 {
-    app.MapOpenApi();
+    Log.Information("Starting Clinic API...");
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    // 2. اربط Serilog بالـ Host
+    builder.Host.UseSerilog();
+
+    // 3. سجّل الـ DbContext
+    builder.Services.AddDbContext<ClinicDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+    // 4. سجّل الـ Controllers
+    builder.Services.AddControllers();
+
+    // 5. OpenAPI (طريقة .NET 10)
+    builder.Services.AddOpenApi();
+
+    var app = builder.Build();
+
+    // 6. الـ Pipeline
+    if (app.Environment.IsDevelopment())
+    {
+        app.MapOpenApi();
+        app.MapScalarApiReference();
+    }
+
+    app.UseHttpsRedirection();
+    app.UseAuthorization();
+    app.MapControllers();
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application crashed unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
