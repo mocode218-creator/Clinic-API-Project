@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Clinic_DataAccess.Entities;
 
 namespace Clinic_DataAccess.Repositories.Interfaces
 {
-    internal class IRoleRepository
+    public interface IRoleRepository : IGenericRepository<Role>
     {
+        Task<Role?> GetByNameAsync(string name);
     }
 }

@@ -1,10 +1,25 @@
-﻿using System;
+﻿using Clinic_DataAccess.Context;
+using Clinic_DataAccess.Entities;
+using Clinic_DataAccess.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Clinic_DataAccess.Repositories.Implementations
 {
-    internal class UserRepository
+    public class UserRepository : GenericRepository<User>, IUserRepository
     {
+        public UserRepository(ClinicDbContext context) : base(context) { }
+
+        public async Task<User?> GetByUsernameAsync(string username)
+        {
+            return await _dbSet
+                .Include(u => u.Person)
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.UserName == username && u.DeletedAt == null);
+        }
+
+    
     }
 }

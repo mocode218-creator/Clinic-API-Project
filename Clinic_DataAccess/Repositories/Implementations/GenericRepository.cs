@@ -20,7 +20,7 @@ namespace Clinic_DataAccess.Repositories.Implementations
         }
 
         // Read
-        public virtual async Task<T?> GetByIdAsync(Guid id)
+        public virtual async Task<T?> GetByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id);
         }

@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Clinic_DataAccess.Entities;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Clinic_DataAccess.Repositories.Interfaces
 {
-    internal class IUserRepository
+    public interface IUserRepository : IGenericRepository<User>
     {
+        Task<User?> GetByUsernameAsync(string username);
+       
     }
 }
