@@ -8,24 +8,12 @@ using System.Text;
 
 namespace Clinic_DataAccess.Repositories.Interfaces
 {
-    public class AuditLogRepository : GenericRepository<AuditLog>, IAuditLogRepository
+    
+
+    public interface IAuditLogRepository : IGenericRepository<AuditLog>
     {
-        public AuditLogRepository(ClinicDbContext context) : base(context) { }
-
-        public async Task<IEnumerable<AuditLog>> GetByRecordAsync(string tableName, long recordId)
-        {
-            return await _dbSet
-                .Where(a => a.TableName == tableName && a.RecordId == recordId)
-                .OrderByDescending(a => a.ChangedAt)
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<AuditLog>> GetByUserAsync(int userId)
-        {
-            return await _dbSet
-                .Where(a => a.UserId == userId)
-                .OrderByDescending(a => a.ChangedAt)
-                .ToListAsync();
-        }
+        Task<IEnumerable<AuditLog>> GetByRecordAsync(string tableName, long recordId);
+        Task<IEnumerable<AuditLog>> GetByUserAsync(int userId);
     }
+
 }
