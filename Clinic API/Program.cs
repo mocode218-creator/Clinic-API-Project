@@ -1,9 +1,8 @@
-using Clinic_DataAccess.Context;
-using Microsoft.EntityFrameworkCore;
+using Clinic_DataAccess.Extensions;    
 using Scalar.AspNetCore;
 using Serilog;
 
-// 1. إعداد Serilog (قبل أي حاجة)
+// 1. إعداد Serilog
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .WriteTo.Console()
@@ -19,9 +18,8 @@ try
     // 2. اربط Serilog بالـ Host
     builder.Host.UseSerilog();
 
-    // 3. سجّل الـ DbContext
-    builder.Services.AddDbContext<ClinicDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    // 3. سجّل الـ DataAccess Layer (DbContext + Repositories + UnitOfWork)
+    builder.Services.AddDataAccessLayer(builder.Configuration);
 
     // 4. سجّل الـ Controllers
     builder.Services.AddControllers();

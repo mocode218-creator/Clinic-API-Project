@@ -2,7 +2,6 @@
 using Clinic_DataAccess.Entities;
 using Clinic_DataAccess.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-
 using System;
 using System.Collections.Generic;
 using System.Text;
