@@ -4,7 +4,13 @@ using System.Text;
 
 namespace Clinic_BusinessLayer.DTOs.Requests.Visits
 {
-    internal class UpdateVisitRequest
+    public class UpdateVisitRequest
     {
+        public string? Symptoms { get; set; }
+        public string? Diagnosis { get; set; }
+        public string? Notes { get; set; }
+        public string? Bp { get; set; }
+        public decimal? Temperature { get; set; }
+        public decimal? Weight { get; set; }
     }
 }

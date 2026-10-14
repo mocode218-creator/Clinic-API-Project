@@ -4,7 +4,10 @@ using System.Text;
 
 namespace Clinic_BusinessLayer.DTOs.Requests.Payments
 {
-    internal class CreatePaymentRequest
+    public class CreatePaymentRequest
     {
+        public int InvoiceId { get; set; }
+        public decimal Amount { get; set; }
+        public string Method { get; set; } = "Cash";   // Cash / Card / Insurance
     }
 }

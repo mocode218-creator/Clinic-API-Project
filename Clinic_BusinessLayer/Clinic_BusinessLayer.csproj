@@ -34,12 +34,4 @@
     <ProjectReference Include="..\Clinic_DataAccess\Clinic_DataAccess.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Mapping\" />
-    <Folder Include="Helpers\" />
-    <Folder Include="Services\Interfaces\" />
-    <Folder Include="Services\Implementations\" />
-    <Folder Include="Validators\" />
-  </ItemGroup>
-
 </Project>

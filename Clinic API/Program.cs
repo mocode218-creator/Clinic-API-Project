@@ -1,4 +1,5 @@
-using Clinic_DataAccess.Extensions;    
+using Clinic_DataAccess.Extensions;
+using Clinic_BusinessLayer.Extensions;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -20,6 +21,7 @@ try
 
     // 3. سجّل الـ DataAccess Layer (DbContext + Repositories + UnitOfWork)
     builder.Services.AddDataAccessLayer(builder.Configuration);
+    builder.Services.AddBusinessLayer();
 
     // 4. سجّل الـ Controllers
     builder.Services.AddControllers();

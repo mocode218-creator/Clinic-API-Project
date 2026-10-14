@@ -4,7 +4,10 @@ using System.Text;
 
 namespace Clinic_BusinessLayer.DTOs.Requests.DoctorSchedules
 {
-    internal class UpdateDoctorScheduleRequest
+    public class UpdateDoctorScheduleRequest
     {
+        public byte DayOfWeek { get; set; }
+        public TimeOnly StartTime { get; set; }
+        public TimeOnly EndTime { get; set; }
     }
 }

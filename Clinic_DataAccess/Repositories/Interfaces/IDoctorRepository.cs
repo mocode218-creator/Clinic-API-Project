@@ -7,7 +7,8 @@ namespace Clinic_DataAccess.Repositories.Interfaces
 {
     public interface IDoctorRepository : IGenericRepository<Doctor>
     {
-       
+        Task<Doctor?> GetWithPersonAsync(int id);
+        Task<IEnumerable<Doctor>> GetAllWithPersonAsync();
         Task<Doctor?> GetByLicenseNumberAsync(string licenseNumber);
         Task<IEnumerable<Doctor>> GetBySpecializationAsync(int specializationId);
        

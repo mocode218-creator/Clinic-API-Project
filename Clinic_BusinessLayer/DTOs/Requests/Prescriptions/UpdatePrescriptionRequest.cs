@@ -4,7 +4,8 @@ using System.Text;
 
 namespace Clinic_BusinessLayer.DTOs.Requests.Prescriptions
 {
-    internal class UpdatePrescriptionRequest
+    public class UpdatePrescriptionRequest
     {
+        public string? Notes { get; set; }
     }
 }

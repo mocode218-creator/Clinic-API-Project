@@ -26,5 +26,13 @@ namespace Clinic_DataAccess.Repositories.Implementations
                 .Include(p => p.PrescriptionItems)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
+
+        public override async Task<IEnumerable<Prescription>> GetAllAsync()
+        {
+            return await _dbSet
+                .Include(p => p.PrescriptionItems)
+                .ToListAsync();
+        }
+
     }
 }

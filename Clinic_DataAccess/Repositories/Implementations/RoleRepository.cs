@@ -19,6 +19,17 @@ namespace Clinic_DataAccess.Repositories.Implementations
                 .FirstOrDefaultAsync(r => r.Name == name && r.DeletedAt == null);
         }
 
+
+        public async Task<bool> IsNameExistsAsync(string name, int? excludeId = null)
+        {
+            var query = _dbSet.Where(r => r.Name == name && r.DeletedAt == null);
+
+            if (excludeId.HasValue)
+                query = query.Where(r => r.Id != excludeId.Value);
+
+            return await query.AnyAsync();
+        }
+
         public override async Task<IEnumerable<Role>> GetAllAsync()
         {
             return await _dbSet.Where(r => r.DeletedAt == null).ToListAsync();

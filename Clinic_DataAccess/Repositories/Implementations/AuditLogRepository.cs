@@ -27,5 +27,22 @@ namespace Clinic_DataAccess.Repositories.Implementations
                 .OrderByDescending(a => a.ChangedAt)
                 .ToListAsync();
         }
+
+        public async Task<AuditLog?> GetByLongIdAsync(long id)
+        {
+            return await _dbSet
+                .Include(a => a.User).ThenInclude(u => u.Person)
+                .FirstOrDefaultAsync(a => a.Id == id);
+        }
+
+
+        public override async Task<IEnumerable<AuditLog>> GetAllAsync()
+        {
+            return await _dbSet
+                .Include(a => a.User).ThenInclude(u => u.Person)
+                .OrderByDescending(a => a.ChangedAt)
+                .ToListAsync();
+        }
+
     }
 }

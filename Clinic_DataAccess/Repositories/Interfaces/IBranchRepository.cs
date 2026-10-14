@@ -8,5 +8,6 @@ namespace Clinic_DataAccess.Repositories.Interfaces
     public interface IBranchRepository : IGenericRepository<Branch>
     {
         Task<Branch?> GetByNameAsync(string name);
+        Task<bool> IsNameExistsAsync(string name, int? excludeId = null);
     }
 }
