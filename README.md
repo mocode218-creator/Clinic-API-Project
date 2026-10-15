@@ -140,20 +140,7 @@ SELECT * FROM Roles;                          -- Admin, Doctor, Receptionist, Nu
 
 ### 3. Configure
 
-Connection string in `Clinic.API/appsettings.json`:
 
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost\\SQLEXPRESS;Database=ClinicDB;Trusted_Connection=True;TrustServerCertificate=True;"
-  },
-  "Jwt": {
-    "Issuer": "ClinicAPI",
-    "Audience": "ClinicAPIClients",
-    "ExpiryHours": "24",
-    "RefreshTokenExpiryDays": "7"
-  }
-}
 ```
 
 Keep the signing key **out of source control**. Use user secrets in development and an environment variable in production:
