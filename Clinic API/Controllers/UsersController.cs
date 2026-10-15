@@ -11,7 +11,6 @@ namespace Clinic_API.Controllers
     [Produces("application/json")]
     public class UsersController : ControllerBase
     {
-
         private readonly IUserService _service;
         private readonly IValidator<CreateUserRequest> _createValidator;
         private readonly IValidator<UpdateUserRequest> _updateValidator;
@@ -40,9 +39,6 @@ namespace Clinic_API.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _service.GetByIdAsync(id);
-            if (result == null)
-                return NotFound(new { message = $"User with id {id} not found" });
-
             return Ok(result);
         }
 
@@ -57,19 +53,8 @@ namespace Clinic_API.Controllers
             if (!validation.IsValid)
                 return BadRequest(new { errors = validation.Errors.Select(e => e.ErrorMessage) });
 
-            try
-            {
-                var result = await _service.CreateAsync(request);
-                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
+            var result = await _service.CreateAsync(request);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
         [HttpPut("{id}", Name = "UpdateUser")]
@@ -83,19 +68,8 @@ namespace Clinic_API.Controllers
             if (!validation.IsValid)
                 return BadRequest(new { errors = validation.Errors.Select(e => e.ErrorMessage) });
 
-            try
-            {
-                var result = await _service.UpdateAsync(id, request);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
+            var result = await _service.UpdateAsync(id, request);
+            return Ok(result);
         }
 
         [HttpDelete("{id}", Name = "DeleteUser")]
@@ -103,12 +77,8 @@ namespace Clinic_API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _service.DeleteAsync(id);
-            if (!deleted)
-                return NotFound(new { message = $"User with id {id} not found" });
-
+            await _service.DeleteAsync(id);
             return NoContent();
         }
-
     }
 }

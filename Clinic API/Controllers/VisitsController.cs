@@ -40,9 +40,6 @@ namespace Clinic_API.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _service.GetByIdAsync(id);
-            if (result == null)
-                return NotFound(new { message = $"Visit with id {id} not found" });
-
             return Ok(result);
         }
 
@@ -52,9 +49,6 @@ namespace Clinic_API.Controllers
         public async Task<IActionResult> GetByAppointment(int appointmentId)
         {
             var result = await _service.GetByAppointmentAsync(appointmentId);
-            if (result == null)
-                return NotFound(new { message = $"No visit found for appointment {appointmentId}" });
-
             return Ok(result);
         }
 
@@ -69,19 +63,8 @@ namespace Clinic_API.Controllers
             if (!validation.IsValid)
                 return BadRequest(new { errors = validation.Errors.Select(e => e.ErrorMessage) });
 
-            try
-            {
-                var result = await _service.CreateAsync(request);
-                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
+            var result = await _service.CreateAsync(request);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
         [HttpPut("{id}", Name = "UpdateVisit")]
@@ -94,15 +77,8 @@ namespace Clinic_API.Controllers
             if (!validation.IsValid)
                 return BadRequest(new { errors = validation.Errors.Select(e => e.ErrorMessage) });
 
-            try
-            {
-                var result = await _service.UpdateAsync(id, request);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+            var result = await _service.UpdateAsync(id, request);
+            return Ok(result);
         }
 
         [HttpDelete("{id}", Name = "DeleteVisit")]
@@ -110,10 +86,7 @@ namespace Clinic_API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _service.DeleteAsync(id);
-            if (!deleted)
-                return NotFound(new { message = $"Visit with id {id} not found" });
-
+            await _service.DeleteAsync(id);
             return NoContent();
         }
 

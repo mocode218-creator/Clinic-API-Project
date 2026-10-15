@@ -40,9 +40,6 @@ namespace Clinic_API.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _service.GetByIdAsync(id);
-            if (result == null)
-                return NotFound(new { message = $"Patient with id {id} not found" });
-
             return Ok(result);
         }
 
@@ -81,15 +78,8 @@ namespace Clinic_API.Controllers
             if (!validation.IsValid)
                 return BadRequest(new { errors = validation.Errors.Select(e => e.ErrorMessage) });
 
-            try
-            {
-                var result = await _service.UpdateAsync(id, request);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+            var result = await _service.UpdateAsync(id, request);
+            return Ok(result);
         }
 
         [HttpDelete("{id}", Name = "DeletePatient")]
@@ -97,10 +87,7 @@ namespace Clinic_API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _service.DeleteAsync(id);
-            if (!deleted)
-                return NotFound(new { message = $"Patient with id {id} not found" });
-
+            await _service.DeleteAsync(id);
             return NoContent();
         }
 

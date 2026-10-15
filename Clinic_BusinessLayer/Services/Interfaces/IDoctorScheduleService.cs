@@ -10,7 +10,7 @@ namespace Clinic_BusinessLayer.Services.Interfaces
     public interface IDoctorScheduleService
     {
         Task<IEnumerable<DoctorScheduleResponse>> GetAllAsync();
-        Task<DoctorScheduleResponse?> GetByIdAsync(int id);
+        Task<DoctorScheduleResponse> GetByIdAsync(int id);
         Task<IEnumerable<DoctorScheduleResponse>> GetByDoctorAsync(int doctorId);
         Task<DoctorScheduleResponse> CreateAsync(CreateDoctorScheduleRequest request);
         Task<DoctorScheduleResponse> UpdateAsync(int id, UpdateDoctorScheduleRequest request);

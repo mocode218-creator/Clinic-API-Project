@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
 using Clinic_BusinessLayer.DTOs.Responses.Invoices;
+using Clinic_BusinessLayer.Exceptions;
 using Clinic_BusinessLayer.Services.Interfaces;
 using Clinic_DataAccess.Entities;
 using Clinic_DataAccess.Repositories.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Clinic_BusinessLayer.Services.Implementations
 {
@@ -26,41 +24,38 @@ namespace Clinic_BusinessLayer.Services.Implementations
             return _mapper.Map<IEnumerable<InvoiceResponse>>(invoices);
         }
 
-        public async Task<InvoiceResponse?> GetByIdAsync(int id)
+        public async Task<InvoiceResponse> GetByIdAsync(int id)
         {
             var invoice = await _unitOfWork.Invoices.GetWithPaymentsAsync(id);
             if (invoice == null)
-                return null;
+                throw new NotFoundException($"Invoice with id {id} not found");
 
             return _mapper.Map<InvoiceResponse>(invoice);
         }
 
-        public async Task<InvoiceResponse?> GetByVisitAsync(int visitId)
+        public async Task<InvoiceResponse> GetByVisitAsync(int visitId)
         {
             var invoice = await _unitOfWork.Invoices.GetByVisitAsync(visitId);
             if (invoice == null)
-                return null;
+                throw new NotFoundException($"No invoice found for visit {visitId}");
 
             return _mapper.Map<InvoiceResponse>(invoice);
         }
 
         public async Task<InvoiceResponse> GenerateAsync(int visitId)
         {
-            // 1. التحقق من الـ Visit
             var visit = await _unitOfWork.Visits.GetByIdAsync(visitId);
             if (visit == null)
-                throw new KeyNotFoundException($"Visit with id {visitId} not found");
+                throw new NotFoundException($"Visit with id {visitId} not found");
 
-            // 2. التحقق إن مش فيه فاتورة أصلًا
             var existing = await _unitOfWork.Invoices.GetByVisitAsync(visitId);
             if (existing != null)
-                throw new InvalidOperationException("This visit already has an invoice");
+                throw new ConflictException("This visit already has an invoice");
 
-            // 3. إنشاء الفاتورة
             var invoice = new Invoice
             {
                 VisitId = visitId,
-                Amount = 500m,   // ← سعر ثابت مؤقت
+                Amount = 500m,
                 Status = "Unpaid"
             };
 
@@ -74,10 +69,10 @@ namespace Clinic_BusinessLayer.Services.Implementations
         {
             var invoice = await _unitOfWork.Invoices.GetByIdAsync(id);
             if (invoice == null)
-                throw new KeyNotFoundException($"Invoice with id {id} not found");
+                throw new NotFoundException($"Invoice with id {id} not found");
 
             if (status != "Paid" && status != "Unpaid")
-                throw new InvalidOperationException("Status must be 'Paid' or 'Unpaid'");
+                throw new BadRequestException("Status must be 'Paid' or 'Unpaid'");
 
             invoice.Status = status;
             _unitOfWork.Invoices.Update(invoice);

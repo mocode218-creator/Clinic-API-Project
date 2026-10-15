@@ -31,9 +31,6 @@ namespace Clinic_API.Controllers
         public async Task<IActionResult> GetById(long id)
         {
             var result = await _service.GetByIdAsync(id);
-            if (result == null)
-                return NotFound(new { message = $"Audit log with id {id} not found" });
-
             return Ok(result);
         }
 

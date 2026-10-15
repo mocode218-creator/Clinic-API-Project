@@ -10,7 +10,7 @@ namespace Clinic_BusinessLayer.Services.Interfaces
     public interface IRoleService
     {
         Task<IEnumerable<RoleResponse>> GetAllAsync();
-        Task<RoleResponse?> GetByIdAsync(int id);
+        Task<RoleResponse> GetByIdAsync(int id);
         Task<RoleResponse> CreateAsync(CreateRoleRequest request);
         Task<RoleResponse> UpdateAsync(int id, UpdateRoleRequest request);
         Task<bool> DeleteAsync(int id);

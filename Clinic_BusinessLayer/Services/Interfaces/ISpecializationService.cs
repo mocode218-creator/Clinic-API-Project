@@ -9,7 +9,7 @@ namespace Clinic_BusinessLayer.Services.Interfaces
     public interface ISpecializationService
     {
         Task<IEnumerable<SpecializationResponse>> GetAllAsync();
-        Task<SpecializationResponse?> GetByIdAsync(int id);
+        Task<SpecializationResponse> GetByIdAsync(int id);
         Task<SpecializationResponse> CreateAsync(CreateSpecializationRequest request);
         Task<SpecializationResponse> UpdateAsync(int id, UpdateSpecializationRequest request);
         Task<bool> DeleteAsync(int id);

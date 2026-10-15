@@ -10,7 +10,7 @@ namespace Clinic_BusinessLayer.Services.Interfaces
     public interface IDoctorService
     {
         Task<IEnumerable<DoctorResponse>> GetAllAsync();
-        Task<DoctorResponse?> GetByIdAsync(int id);
+        Task<DoctorResponse> GetByIdAsync(int id);
         Task<IEnumerable<DoctorResponse>> GetBySpecializationAsync(int specializationId);
         Task<DoctorResponse> CreateAsync(CreateDoctorRequest request);
         Task<DoctorResponse> UpdateAsync(int id, UpdateDoctorRequest request);

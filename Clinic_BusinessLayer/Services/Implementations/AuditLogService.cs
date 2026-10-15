@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
 using Clinic_BusinessLayer.DTOs.Responses.AuditLogs;
+using Clinic_BusinessLayer.Exceptions;
 using Clinic_BusinessLayer.Services.Interfaces;
 using Clinic_DataAccess.Entities;
 using Clinic_DataAccess.Repositories.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Clinic_BusinessLayer.Services.Implementations
 {
@@ -26,10 +24,12 @@ namespace Clinic_BusinessLayer.Services.Implementations
             return _mapper.Map<IEnumerable<AuditLogResponse>>(logs);
         }
 
-        public async Task<AuditLogResponse?> GetByIdAsync(long id)
+        public async Task<AuditLogResponse> GetByIdAsync(long id)
         {
             var log = await _unitOfWork.AuditLogs.GetByLongIdAsync(id);
-            if (log == null) return null;
+            if (log == null)
+                throw new NotFoundException($"Audit log with id {id} not found");
+
             return _mapper.Map<AuditLogResponse>(log);
         }
 

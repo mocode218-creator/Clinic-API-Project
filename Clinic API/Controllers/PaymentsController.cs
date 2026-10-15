@@ -11,7 +11,6 @@ namespace Clinic_API.Controllers
     [Produces("application/json")]
     public class PaymentsController : ControllerBase
     {
-
         private readonly IPaymentService _service;
         private readonly IValidator<CreatePaymentRequest> _createValidator;
 
@@ -37,9 +36,6 @@ namespace Clinic_API.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _service.GetByIdAsync(id);
-            if (result == null)
-                return NotFound(new { message = $"Payment with id {id} not found" });
-
             return Ok(result);
         }
 
@@ -61,18 +57,10 @@ namespace Clinic_API.Controllers
             if (!validation.IsValid)
                 return BadRequest(new { errors = validation.Errors.Select(e => e.ErrorMessage) });
 
-            try
-            {
-                var result = await _service.CreateAsync(request);
-                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+            var result = await _service.CreateAsync(request);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
         // ⚠️ مفيش Update / Delete — الفلوس مبتتعدلش
-
     }
 }

@@ -10,7 +10,7 @@ namespace Clinic_BusinessLayer.Services.Interfaces
     public interface IAppointmentService
     {
         Task<IEnumerable<AppointmentResponse>> GetAllAsync();
-        Task<AppointmentResponse?> GetByIdAsync(int id);
+        Task<AppointmentResponse> GetByIdAsync(int id);
         Task<IEnumerable<AppointmentResponse>> GetByPatientAsync(int patientId);
         Task<IEnumerable<AppointmentResponse>> GetByDoctorAndDateAsync(int doctorId, DateTime date);
         Task<AppointmentResponse> CreateAsync(CreateAppointmentRequest request, int createdByUserId);

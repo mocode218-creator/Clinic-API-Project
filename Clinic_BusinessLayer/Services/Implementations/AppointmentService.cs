@@ -1,13 +1,11 @@
 ﻿using AutoMapper;
 using Clinic_BusinessLayer.DTOs.Requests.Appointments;
 using Clinic_BusinessLayer.DTOs.Responses.Appointments;
+using Clinic_BusinessLayer.Exceptions;
 using Clinic_BusinessLayer.Helpers;
 using Clinic_BusinessLayer.Services.Interfaces;
 using Clinic_DataAccess.Entities;
 using Clinic_DataAccess.Repositories.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Clinic_BusinessLayer.Services.Implementations
 {
@@ -30,11 +28,11 @@ namespace Clinic_BusinessLayer.Services.Implementations
             return _mapper.Map<IEnumerable<AppointmentResponse>>(appointments);
         }
 
-        public async Task<AppointmentResponse?> GetByIdAsync(int id)
+        public async Task<AppointmentResponse> GetByIdAsync(int id)
         {
             var appointment = await _unitOfWork.Appointments.GetWithDetailsAsync(id);
             if (appointment == null)
-                return null;
+                throw new NotFoundException($"Appointment with id {id} not found");
 
             return _mapper.Map<AppointmentResponse>(appointment);
         }
@@ -53,33 +51,27 @@ namespace Clinic_BusinessLayer.Services.Implementations
 
         public async Task<AppointmentResponse> CreateAsync(CreateAppointmentRequest request, int createdByUserId)
         {
-            // 1. التحقق من المريض
             var patient = await _unitOfWork.Patients.GetWithPersonAsync(request.PatientId);
             if (patient == null || patient.DeletedAt != null)
-                throw new KeyNotFoundException($"Patient with id {request.PatientId} not found");
+                throw new NotFoundException($"Patient with id {request.PatientId} not found");
 
-            // 2. التحقق من الدكتور
             var doctor = await _unitOfWork.Doctors.GetWithPersonAsync(request.DoctorId);
             if (doctor == null || doctor.DeletedAt != null)
-                throw new KeyNotFoundException($"Doctor with id {request.DoctorId} not found");
+                throw new NotFoundException($"Doctor with id {request.DoctorId} not found");
 
-            // 3. التحقق من الفرع
-            var branch = await _unitOfWork.Branches.GetByIdAsync(request.BranchId);  // ده عادي;
+            var branch = await _unitOfWork.Branches.GetByIdAsync(request.BranchId);
             if (branch == null || branch.DeletedAt != null)
-                throw new KeyNotFoundException($"Branch with id {request.BranchId} not found");
+                throw new NotFoundException($"Branch with id {request.BranchId} not found");
 
-            // 4. التحقق من الـ Slot
             if (!SlotHelper.IsValidSlot(request.StartDate))
-                throw new InvalidOperationException("Appointment must start on a 15-minute slot");
+                throw new BadRequestException("Appointment must start on a 15-minute slot");
 
-            // 5. منع الحجز المكرر
             var isBooked = await _unitOfWork.Appointments.IsSlotBookedAsync(
                 request.DoctorId, request.StartDate);
 
             if (isBooked)
-                throw new InvalidOperationException("This appointment slot is already booked");
+                throw new ConflictException("This appointment slot is already booked");
 
-            // 6. إنشاء الحجز
             var appointment = _mapper.Map<Appointment>(request);
             appointment.CreatedBy = createdByUserId;
             appointment.EndDate = SlotHelper.CalculateEndTime(request.StartDate);
@@ -88,10 +80,8 @@ namespace Clinic_BusinessLayer.Services.Implementations
             await _unitOfWork.Appointments.AddAsync(appointment);
             await _unitOfWork.SaveChangesAsync();
 
-            // 7. تسجيل في الـ AuditLog
             await _auditLog.LogAsync(createdByUserId, "Appointments", appointment.Id, "Created", null, "Appointment Created");
 
-            // 8. تحميل التفاصيل
             appointment.Patient = patient;
             appointment.Doctor = doctor;
             appointment.Branch = branch;
@@ -103,19 +93,18 @@ namespace Clinic_BusinessLayer.Services.Implementations
         {
             var appointment = await _unitOfWork.Appointments.GetWithDetailsAsync(id);
             if (appointment == null)
-                throw new KeyNotFoundException($"Appointment with id {id} not found");
+                throw new NotFoundException($"Appointment with id {id} not found");
 
-            // لو الوقت اتغير، تحقق من الـ Slot ومنع التكرار
             if (appointment.StartDate != request.StartDate)
             {
                 if (!SlotHelper.IsValidSlot(request.StartDate))
-                    throw new InvalidOperationException("Appointment must start on a 15-minute slot");
+                    throw new BadRequestException("Appointment must start on a 15-minute slot");
 
                 var isBooked = await _unitOfWork.Appointments.IsSlotBookedAsync(
                     appointment.DoctorId, request.StartDate, id);
 
                 if (isBooked)
-                    throw new InvalidOperationException("This appointment slot is already booked");
+                    throw new ConflictException("This appointment slot is already booked");
 
                 appointment.EndDate = SlotHelper.CalculateEndTime(request.StartDate);
             }
@@ -131,14 +120,13 @@ namespace Clinic_BusinessLayer.Services.Implementations
         {
             var appointment = await _unitOfWork.Appointments.GetWithDetailsAsync(id);
             if (appointment == null)
-                throw new KeyNotFoundException($"Appointment with id {id} not found");
+                throw new NotFoundException($"Appointment with id {id} not found");
 
             if (appointment.Status == "Cancelled")
-                throw new InvalidOperationException("Appointment is already cancelled");
+                throw new ConflictException("Appointment is already cancelled");
 
-            // قاعدة: مينفعش تلغي قبل المعاد بأقل من ساعتين
             if (appointment.StartDate - DateTime.UtcNow < TimeSpan.FromHours(2))
-                throw new InvalidOperationException("Cannot cancel appointment less than 2 hours before it starts");
+                throw new BadRequestException("Cannot cancel appointment less than 2 hours before it starts");
 
             appointment.Status = "Cancelled";
             _unitOfWork.Appointments.Update(appointment);
@@ -151,7 +139,7 @@ namespace Clinic_BusinessLayer.Services.Implementations
         {
             var appointment = await _unitOfWork.Appointments.GetByIdAsync(id);
             if (appointment == null)
-                return false;
+                throw new NotFoundException($"Appointment with id {id} not found");
 
             _unitOfWork.Appointments.Remove(appointment);
             await _unitOfWork.SaveChangesAsync();

@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AutoMapper;
+﻿using AutoMapper;
 using Clinic_BusinessLayer.DTOs.Requests.Branches;
 using Clinic_BusinessLayer.DTOs.Responses.Branches;
+using Clinic_BusinessLayer.Exceptions;                       // ← 🆕
 using Clinic_BusinessLayer.Services.Interfaces;
 using Clinic_DataAccess.Entities;
 using Clinic_DataAccess.Repositories.Interfaces;
@@ -27,11 +25,11 @@ namespace Clinic_BusinessLayer.Services.Implementations
             return _mapper.Map<IEnumerable<BranchResponse>>(branches);
         }
 
-        public async Task<BranchResponse?> GetByIdAsync(int id)
+        public async Task<BranchResponse> GetByIdAsync(int id)
         {
             var branch = await _unitOfWork.Branches.GetByIdAsync(id);
             if (branch == null || branch.DeletedAt != null)
-                return null;
+                throw new NotFoundException($"Branch with id {id} not found");
 
             return _mapper.Map<BranchResponse>(branch);
         }
@@ -40,7 +38,7 @@ namespace Clinic_BusinessLayer.Services.Implementations
         {
             var existing = await _unitOfWork.Branches.GetByNameAsync(request.Name);
             if (existing != null)
-                throw new InvalidOperationException($"Branch with name '{request.Name}' already exists");
+                throw new ConflictException($"Branch with name '{request.Name}' already exists");
 
             var branch = _mapper.Map<Branch>(request);
             await _unitOfWork.Branches.AddAsync(branch);
@@ -53,13 +51,13 @@ namespace Clinic_BusinessLayer.Services.Implementations
         {
             var branch = await _unitOfWork.Branches.GetByIdAsync(id);
             if (branch == null || branch.DeletedAt != null)
-                throw new KeyNotFoundException($"Branch with id {id} not found");
+                throw new NotFoundException($"Branch with id {id} not found");
 
             if (branch.Name != request.Name)
             {
                 var existing = await _unitOfWork.Branches.GetByNameAsync(request.Name);
                 if (existing != null && existing.Id != id)
-                    throw new InvalidOperationException($"Branch with name '{request.Name}' already exists");
+                    throw new ConflictException($"Branch with name '{request.Name}' already exists");
             }
 
             _mapper.Map(request, branch);
@@ -73,7 +71,7 @@ namespace Clinic_BusinessLayer.Services.Implementations
         {
             var branch = await _unitOfWork.Branches.GetByIdAsync(id);
             if (branch == null || branch.DeletedAt != null)
-                return false;
+                throw new NotFoundException($"Branch with id {id} not found");
 
             branch.DeletedAt = DateTime.UtcNow;
             _unitOfWork.Branches.Update(branch);

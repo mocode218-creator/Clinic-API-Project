@@ -10,8 +10,8 @@ namespace Clinic_BusinessLayer.Services.Interfaces
     public interface IVisitService
     {
         Task<IEnumerable<VisitResponse>> GetAllAsync();
-        Task<VisitResponse?> GetByIdAsync(int id);
-        Task<VisitResponse?> GetByAppointmentAsync(int appointmentId);
+        Task<VisitResponse> GetByIdAsync(int id);
+        Task<VisitResponse> GetByAppointmentAsync(int appointmentId);
         Task<VisitResponse> CreateAsync(CreateVisitRequest request);
         Task<VisitResponse> UpdateAsync(int id, UpdateVisitRequest request);
         Task<bool> DeleteAsync(int id);

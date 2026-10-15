@@ -1,5 +1,6 @@
 using Clinic_DataAccess.Extensions;
 using Clinic_BusinessLayer.Extensions;
+using Clinic_API.Extensions;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -31,6 +32,9 @@ try
 
     var app = builder.Build();
 
+    // ✅ أول حاجة — عشان يمسك كل الأخطاء
+    app.UseExceptionHandling();
+
     // 6. الـ Pipeline
     if (app.Environment.IsDevelopment())
     {
@@ -39,6 +43,7 @@ try
     }
 
     app.UseHttpsRedirection();
+    app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
 

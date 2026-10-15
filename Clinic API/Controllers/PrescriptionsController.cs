@@ -37,9 +37,6 @@ namespace Clinic_API.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _service.GetByIdAsync(id);
-            if (result == null)
-                return NotFound(new { message = $"Prescription with id {id} not found" });
-
             return Ok(result);
         }
 
@@ -61,15 +58,8 @@ namespace Clinic_API.Controllers
             if (!validation.IsValid)
                 return BadRequest(new { errors = validation.Errors.Select(e => e.ErrorMessage) });
 
-            try
-            {
-                var result = await _service.CreateAsync(request);
-                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+            var result = await _service.CreateAsync(request);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
         [HttpPut("{id}", Name = "UpdatePrescription")]
@@ -77,15 +67,8 @@ namespace Clinic_API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update(int id, [FromBody] UpdatePrescriptionRequest request)
         {
-            try
-            {
-                var result = await _service.UpdateAsync(id, request);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+            var result = await _service.UpdateAsync(id, request);
+            return Ok(result);
         }
 
         // ⚠️ مفيش Delete — Prescriptions immutable

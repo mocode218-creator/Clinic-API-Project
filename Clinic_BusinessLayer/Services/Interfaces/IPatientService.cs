@@ -10,7 +10,7 @@ namespace Clinic_BusinessLayer.Services.Interfaces
     public interface IPatientService
     {
         Task<IEnumerable<PatientResponse>> GetAllAsync();
-        Task<PatientResponse?> GetByIdAsync(int id);
+        Task<PatientResponse> GetByIdAsync(int id);
         Task<IEnumerable<PatientResponse>> SearchAsync(string searchTerm);
         Task<PatientResponse> CreateAsync(CreatePatientRequest request);
         Task<PatientResponse> UpdateAsync(int id, UpdatePatientRequest request);

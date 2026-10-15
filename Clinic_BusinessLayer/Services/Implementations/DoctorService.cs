@@ -1,12 +1,10 @@
 ﻿using AutoMapper;
 using Clinic_BusinessLayer.DTOs.Requests.Doctors;
 using Clinic_BusinessLayer.DTOs.Responses.Doctors;
+using Clinic_BusinessLayer.Exceptions;                       // ← 🆕
 using Clinic_BusinessLayer.Services.Interfaces;
 using Clinic_DataAccess.Entities;
 using Clinic_DataAccess.Repositories.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Clinic_BusinessLayer.Services.Implementations
 {
@@ -27,11 +25,11 @@ namespace Clinic_BusinessLayer.Services.Implementations
             return _mapper.Map<IEnumerable<DoctorResponse>>(doctors);
         }
 
-        public async Task<DoctorResponse?> GetByIdAsync(int id)
+        public async Task<DoctorResponse> GetByIdAsync(int id)
         {
             var doctor = await _unitOfWork.Doctors.GetWithPersonAsync(id);
             if (doctor == null || doctor.DeletedAt != null)
-                return null;
+                throw new NotFoundException($"Doctor with id {id} not found");
 
             return _mapper.Map<DoctorResponse>(doctor);
         }
@@ -44,22 +42,18 @@ namespace Clinic_BusinessLayer.Services.Implementations
 
         public async Task<DoctorResponse> CreateAsync(CreateDoctorRequest request)
         {
-            // 1. التحقق من رقم الترخيص
             var existing = await _unitOfWork.Doctors.GetByLicenseNumberAsync(request.LicenseNumber);
             if (existing != null)
-                throw new InvalidOperationException($"Doctor with license '{request.LicenseNumber}' already exists");
+                throw new ConflictException($"Doctor with license '{request.LicenseNumber}' already exists");
 
-            // 2. التحقق من التخصص
             var specialization = await _unitOfWork.Specializations.GetByIdAsync(request.SpecializationId);
             if (specialization == null || specialization.DeletedAt != null)
-                throw new KeyNotFoundException($"Specialization with id {request.SpecializationId} not found");
+                throw new NotFoundException($"Specialization with id {request.SpecializationId} not found");
 
-            // 3. إنشاء Person
             var person = _mapper.Map<Person>(request);
             await _unitOfWork.Persons.AddAsync(person);
             await _unitOfWork.SaveChangesAsync();
 
-            // 4. إنشاء Doctor
             var doctor = _mapper.Map<Doctor>(request);
             doctor.PersonId = person.Id;
             await _unitOfWork.Doctors.AddAsync(doctor);
@@ -75,21 +69,18 @@ namespace Clinic_BusinessLayer.Services.Implementations
         {
             var doctor = await _unitOfWork.Doctors.GetWithPersonAsync(id);
             if (doctor == null || doctor.DeletedAt != null)
-                throw new KeyNotFoundException($"Doctor with id {id} not found");
+                throw new NotFoundException($"Doctor with id {id} not found");
 
-            // التحقق من الترخيص لو اتغير
             if (doctor.LicenseNumber != request.LicenseNumber)
             {
                 var existing = await _unitOfWork.Doctors.GetByLicenseNumberAsync(request.LicenseNumber);
                 if (existing != null && existing.Id != id)
-                    throw new InvalidOperationException($"Doctor with license '{request.LicenseNumber}' already exists");
+                    throw new ConflictException($"Doctor with license '{request.LicenseNumber}' already exists");
             }
 
-            // تعديل الـ Person
             _mapper.Map(request, doctor.Person);
             _unitOfWork.Persons.Update(doctor.Person);
 
-            // تعديل الـ Doctor
             _mapper.Map(request, doctor);
             _unitOfWork.Doctors.Update(doctor);
 
@@ -103,7 +94,7 @@ namespace Clinic_BusinessLayer.Services.Implementations
         {
             var doctor = await _unitOfWork.Doctors.GetByIdAsync(id);
             if (doctor == null || doctor.DeletedAt != null)
-                return false;
+                throw new NotFoundException($"Doctor with id {id} not found");
 
             doctor.DeletedAt = DateTime.UtcNow;
             _unitOfWork.Doctors.Update(doctor);
@@ -112,4 +103,4 @@ namespace Clinic_BusinessLayer.Services.Implementations
             return true;
         }
     }
- }
+}

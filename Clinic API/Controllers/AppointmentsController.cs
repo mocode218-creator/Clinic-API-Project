@@ -41,9 +41,6 @@ namespace Clinic_API.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _service.GetByIdAsync(id);
-            if (result == null)
-                return NotFound(new { message = $"Appointment with id {id} not found" });
-
             return Ok(result);
         }
 
@@ -77,19 +74,8 @@ namespace Clinic_API.Controllers
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var createdByUserId = int.TryParse(userIdClaim, out var uid) ? uid : 1;
 
-            try
-            {
-                var result = await _service.CreateAsync(request, createdByUserId);
-                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
+            var result = await _service.CreateAsync(request, createdByUserId);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
         [HttpPut("{id}", Name = "UpdateAppointment")]
@@ -103,40 +89,19 @@ namespace Clinic_API.Controllers
             if (!validation.IsValid)
                 return BadRequest(new { errors = validation.Errors.Select(e => e.ErrorMessage) });
 
-            try
-            {
-                var result = await _service.UpdateAsync(id, request);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
+            var result = await _service.UpdateAsync(id, request);
+            return Ok(result);
         }
 
         [HttpPatch("{id}/Cancel", Name = "CancelAppointment")]
         [ProducesResponseType(typeof(AppointmentResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Cancel(int id)
         {
-            try
-            {
-                var result = await _service.CancelAsync(id);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
+            var result = await _service.CancelAsync(id);
+            return Ok(result);
         }
 
         [HttpDelete("{id}", Name = "DeleteAppointment")]
@@ -144,10 +109,7 @@ namespace Clinic_API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _service.DeleteAsync(id);
-            if (!deleted)
-                return NotFound(new { message = $"Appointment with id {id} not found" });
-
+            await _service.DeleteAsync(id);
             return NoContent();
         }
 

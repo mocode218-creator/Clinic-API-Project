@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AutoMapper;
+﻿using AutoMapper;
 using Clinic_BusinessLayer.DTOs.Requests.Patients;
 using Clinic_BusinessLayer.DTOs.Responses.Patients;
+using Clinic_BusinessLayer.Exceptions;                       // ← 🆕
 using Clinic_BusinessLayer.Services.Interfaces;
 using Clinic_DataAccess.Entities;
 using Clinic_DataAccess.Repositories.Interfaces;
-
 
 namespace Clinic_BusinessLayer.Services.Implementations
 {
@@ -28,11 +25,11 @@ namespace Clinic_BusinessLayer.Services.Implementations
             return _mapper.Map<IEnumerable<PatientResponse>>(patients);
         }
 
-        public async Task<PatientResponse?> GetByIdAsync(int id)
+        public async Task<PatientResponse> GetByIdAsync(int id)
         {
             var patient = await _unitOfWork.Patients.GetWithPersonAsync(id);
             if (patient == null || patient.DeletedAt != null)
-                return null;
+                throw new NotFoundException($"Patient with id {id} not found");
 
             return _mapper.Map<PatientResponse>(patient);
         }
@@ -66,13 +63,11 @@ namespace Clinic_BusinessLayer.Services.Implementations
         {
             var patient = await _unitOfWork.Patients.GetWithPersonAsync(id);
             if (patient == null || patient.DeletedAt != null)
-                throw new KeyNotFoundException($"Patient with id {id} not found");
+                throw new NotFoundException($"Patient with id {id} not found");
 
-            // تعديل الـ Person
             _mapper.Map(request, patient.Person);
             _unitOfWork.Persons.Update(patient.Person);
 
-            // تعديل الـ Patient
             _mapper.Map(request, patient);
             _unitOfWork.Patients.Update(patient);
 
@@ -85,7 +80,7 @@ namespace Clinic_BusinessLayer.Services.Implementations
         {
             var patient = await _unitOfWork.Patients.GetByIdAsync(id);
             if (patient == null || patient.DeletedAt != null)
-                return false;
+                throw new NotFoundException($"Patient with id {id} not found");
 
             patient.DeletedAt = DateTime.UtcNow;
             _unitOfWork.Patients.Update(patient);

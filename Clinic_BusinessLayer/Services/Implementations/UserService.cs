@@ -1,13 +1,11 @@
 ﻿using AutoMapper;
 using Clinic_BusinessLayer.DTOs.Requests.Users;
 using Clinic_BusinessLayer.DTOs.Responses.Users;
+using Clinic_BusinessLayer.Exceptions;                       // ← 🆕
 using Clinic_BusinessLayer.Helpers;
 using Clinic_BusinessLayer.Services.Interfaces;
 using Clinic_DataAccess.Entities;
 using Clinic_DataAccess.Repositories.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Clinic_BusinessLayer.Services.Implementations
 {
@@ -28,33 +26,29 @@ namespace Clinic_BusinessLayer.Services.Implementations
             return _mapper.Map<IEnumerable<UserResponse>>(users);
         }
 
-        public async Task<UserResponse?> GetByIdAsync(int id)
+        public async Task<UserResponse> GetByIdAsync(int id)
         {
             var user = await _unitOfWork.Users.GetWithPersonAsync(id);
             if (user == null || user.DeletedAt != null)
-                return null;
+                throw new NotFoundException($"User with id {id} not found");
 
             return _mapper.Map<UserResponse>(user);
         }
 
         public async Task<UserResponse> CreateAsync(CreateUserRequest request)
         {
-            // 1. التحقق من اسم المستخدم
             var existing = await _unitOfWork.Users.IsUsernameExistsAsync(request.UserName);
             if (existing)
-                throw new InvalidOperationException($"Username '{request.UserName}' already exists");
+                throw new ConflictException($"Username '{request.UserName}' already exists");
 
-            // 2. التحقق من الـ Role
             var role = await _unitOfWork.Roles.GetByIdAsync(request.RoleId);
             if (role == null || role.DeletedAt != null)
-                throw new KeyNotFoundException($"Role with id {request.RoleId} not found");
+                throw new NotFoundException($"Role with id {request.RoleId} not found");
 
-            // 3. إنشاء Person
             var person = _mapper.Map<Person>(request);
             await _unitOfWork.Persons.AddAsync(person);
             await _unitOfWork.SaveChangesAsync();
 
-            // 4. إنشاء User
             var user = _mapper.Map<User>(request);
             user.PersonId = person.Id;
             user.PasswordHash = PasswordHelper.Hash(request.Password);
@@ -73,21 +67,18 @@ namespace Clinic_BusinessLayer.Services.Implementations
         {
             var user = await _unitOfWork.Users.GetWithPersonAsync(id);
             if (user == null || user.DeletedAt != null)
-                throw new KeyNotFoundException($"User with id {id} not found");
+                throw new NotFoundException($"User with id {id} not found");
 
-            // التحقق من اسم المستخدم لو اتغير
             if (user.UserName != request.UserName)
             {
                 var existing = await _unitOfWork.Users.IsUsernameExistsAsync(request.UserName, id);
                 if (existing)
-                    throw new InvalidOperationException($"Username '{request.UserName}' already exists");
+                    throw new ConflictException($"Username '{request.UserName}' already exists");
             }
 
-            // تعديل الـ Person
             _mapper.Map(request, user.Person);
             _unitOfWork.Persons.Update(user.Person);
 
-            // تعديل الـ User
             _mapper.Map(request, user);
             _unitOfWork.Users.Update(user);
 
@@ -101,7 +92,7 @@ namespace Clinic_BusinessLayer.Services.Implementations
         {
             var user = await _unitOfWork.Users.GetByIdAsync(id);
             if (user == null || user.DeletedAt != null)
-                return false;
+                throw new NotFoundException($"User with id {id} not found");
 
             user.DeletedAt = DateTime.UtcNow;
             _unitOfWork.Users.Update(user);
