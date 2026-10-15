@@ -2,6 +2,7 @@
 using Clinic_BusinessLayer.DTOs.Responses.Branches;
 using Clinic_BusinessLayer.Services.Interfaces;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clinic_API.Controllers
@@ -9,6 +10,7 @@ namespace Clinic_API.Controllers
     [ApiController]
     [Route("api/v1/Branches")]
     [Produces("application/json")]
+    [Authorize]
     public class BranchesController : ControllerBase
     {
         private readonly IBranchService _service;

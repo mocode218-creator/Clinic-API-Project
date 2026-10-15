@@ -36,6 +36,7 @@ namespace Clinic_BusinessLayer.Extensions
             services.AddScoped<IInvoiceService, InvoiceService>();
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IAuditLogService, AuditLogService>();
+            services.AddScoped<IAuthService, AuthService>();
 
             return services;
         }

@@ -1,7 +1,9 @@
 ﻿using Clinic_BusinessLayer.DTOs.Requests.Appointments;
 using Clinic_BusinessLayer.DTOs.Responses.Appointments;
+using Clinic_BusinessLayer.Exceptions;
 using Clinic_BusinessLayer.Services.Interfaces;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -10,6 +12,7 @@ namespace Clinic_API.Controllers
     [ApiController]
     [Route("api/v1/Appointments")]
     [Produces("application/json")]
+    [Authorize]
     public class AppointmentsController : ControllerBase
     {
 
@@ -72,7 +75,10 @@ namespace Clinic_API.Controllers
                 return BadRequest(new { errors = validation.Errors.Select(e => e.ErrorMessage) });
 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var createdByUserId = int.TryParse(userIdClaim, out var uid) ? uid : 1;
+            if (string.IsNullOrEmpty(userIdClaim))
+                throw new UnauthorizedException("User not authenticated");
+
+            var createdByUserId = int.Parse(userIdClaim);
 
             var result = await _service.CreateAsync(request, createdByUserId);
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);

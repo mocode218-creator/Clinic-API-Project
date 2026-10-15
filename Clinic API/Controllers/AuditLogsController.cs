@@ -1,5 +1,6 @@
 ﻿using Clinic_BusinessLayer.DTOs.Responses.AuditLogs;
 using Clinic_BusinessLayer.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clinic_API.Controllers
@@ -7,6 +8,7 @@ namespace Clinic_API.Controllers
     [ApiController]
     [Route("api/v1/AuditLogs")]
     [Produces("application/json")]
+    [Authorize(Roles = "Admin")]
     public class AuditLogsController : ControllerBase
     {
 

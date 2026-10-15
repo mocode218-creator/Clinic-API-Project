@@ -2,6 +2,7 @@
 using Clinic_BusinessLayer.DTOs.Responses.Users;
 using Clinic_BusinessLayer.Services.Interfaces;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clinic_API.Controllers
@@ -9,6 +10,7 @@ namespace Clinic_API.Controllers
     [ApiController]
     [Route("api/v1/Users")]
     [Produces("application/json")]
+    [Authorize(Roles = "Admin")]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _service;

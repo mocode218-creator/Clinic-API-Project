@@ -2,6 +2,7 @@
 using Clinic_BusinessLayer.DTOs.Responses.Visits;
 using Clinic_BusinessLayer.Services.Interfaces;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clinic_API.Controllers
@@ -9,6 +10,7 @@ namespace Clinic_API.Controllers
     [ApiController]
     [Route("api/v1/Visits")]
     [Produces("application/json")]
+    [Authorize]
     public class VisitsController : ControllerBase
     {
 

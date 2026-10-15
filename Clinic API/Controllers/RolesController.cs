@@ -2,6 +2,7 @@
 using Clinic_BusinessLayer.DTOs.Responses.Roles;
 using Clinic_BusinessLayer.Services.Interfaces;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -10,6 +11,7 @@ namespace Clinic_API.Controllers
     [ApiController]
     [Route("api/v1/Roles")]
     [Produces("application/json")]
+    [Authorize(Roles = "Admin")]
     public class RolesController : ControllerBase
     {
 

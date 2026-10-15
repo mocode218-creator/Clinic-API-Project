@@ -23,6 +23,7 @@ try
     // 3. سجّل الـ DataAccess Layer (DbContext + Repositories + UnitOfWork)
     builder.Services.AddDataAccessLayer(builder.Configuration);
     builder.Services.AddBusinessLayer();
+    builder.Services.AddApiLayer(builder.Configuration);
 
     // 4. سجّل الـ Controllers
     builder.Services.AddControllers();
@@ -43,6 +44,7 @@ try
     }
 
     app.UseHttpsRedirection();
+    app.UseCors("DefaultPolicy");
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();

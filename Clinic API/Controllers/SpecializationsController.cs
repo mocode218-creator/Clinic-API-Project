@@ -2,6 +2,7 @@
 using Clinic_BusinessLayer.DTOs.Responses.Specializations;
 using Clinic_BusinessLayer.Services.Interfaces;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Xml.Linq;
 
@@ -11,6 +12,7 @@ namespace Clinic_API.Controllers
     //[Route("api/v1/[controller]")]
     [Route("api/v1/Specializations")]
     [Produces("application/json")]
+    [Authorize]
     public class SpecializationsController : ControllerBase
     {
         private readonly ISpecializationService _service;

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Clinic_BusinessLayer.DTOs.Requests.Auth;
 using Clinic_BusinessLayer.DTOs.Requests.Users;
 using Clinic_BusinessLayer.DTOs.Responses.Users;
 using Clinic_DataAccess.Entities;
@@ -43,6 +44,19 @@ namespace Clinic_BusinessLayer.Mapping
 
             CreateMap<UpdateUserRequest, Person>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+
+
+            // 🆕 RegisterRequest → Person
+            CreateMap<RegisterRequest, Person>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Doctor, opt => opt.Ignore())
+                .ForMember(dest => dest.Patient, opt => opt.Ignore())
+                .ForMember(dest => dest.User, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+
         }
     }
 }
