@@ -4,12 +4,10 @@ using Clinic_BusinessLayer.Services.Interfaces;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Xml.Linq;
 
 namespace Clinic_API.Controllers
 {
     [ApiController]
-    //[Route("api/v1/[controller]")]
     [Route("api/v1/Specializations")]
     [Produces("application/json")]
     [Authorize]
@@ -68,42 +66,20 @@ namespace Clinic_API.Controllers
 
 
         [HttpPut("{id}", Name = "UpdateSpecialization")]
-        [ProducesResponseType(typeof(SpecializationResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateSpecializationRequest request)
         {
             var validation = await _updateValidator.ValidateAsync(request);
             if (!validation.IsValid)
                 return BadRequest(new { errors = validation.Errors.Select(e => e.ErrorMessage) });
 
-            try
-            {
-                var result = await _service.UpdateAsync(id, request);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
+            var result = await _service.UpdateAsync(id, request);
+            return Ok(result);
         }
 
-
-
         [HttpDelete("{id}", Name = "DeleteSpecialization")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _service.DeleteAsync(id);
-            if (!deleted)
-                return NotFound(new { message = $"Specialization with id {id} not found" });
-
+            await _service.DeleteAsync(id);
             return NoContent();
         }
 

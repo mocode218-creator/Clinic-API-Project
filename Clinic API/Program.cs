@@ -44,6 +44,8 @@ try
     }
 
     app.UseHttpsRedirection();
+    // ✅ Rate Limiting — قبل الـ Endpoints
+    app.UseRateLimiter();
     app.UseCors("DefaultPolicy");
     app.UseAuthentication();
     app.UseAuthorization();

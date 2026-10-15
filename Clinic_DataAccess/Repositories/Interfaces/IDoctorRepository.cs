@@ -9,6 +9,7 @@ namespace Clinic_DataAccess.Repositories.Interfaces
     {
         Task<Doctor?> GetWithPersonAsync(int id);
         Task<IEnumerable<Doctor>> GetAllWithPersonAsync();
+        Task<Doctor?> GetByPersonIdAsync(int personId);
         Task<Doctor?> GetByLicenseNumberAsync(string licenseNumber);
         Task<IEnumerable<Doctor>> GetBySpecializationAsync(int specializationId);
        

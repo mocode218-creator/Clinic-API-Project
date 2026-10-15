@@ -27,6 +27,8 @@ public partial class User
 
     public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
 
+    public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+
     public virtual Person Person { get; set; } = null!;
 
     public virtual Role Role { get; set; } = null!;

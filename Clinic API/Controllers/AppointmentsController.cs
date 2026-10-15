@@ -12,22 +12,25 @@ namespace Clinic_API.Controllers
     [ApiController]
     [Route("api/v1/Appointments")]
     [Produces("application/json")]
-    [Authorize]
+    [Authorize(Roles = "Admin,Receptionist,Doctor")]
     public class AppointmentsController : ControllerBase
     {
 
         private readonly IAppointmentService _service;
         private readonly IValidator<CreateAppointmentRequest> _createValidator;
         private readonly IValidator<UpdateAppointmentRequest> _updateValidator;
+        private readonly IAuthorizationService _authorizationService;   // ← 🆕
 
         public AppointmentsController(
             IAppointmentService service,
             IValidator<CreateAppointmentRequest> createValidator,
-            IValidator<UpdateAppointmentRequest> updateValidator)
+            IValidator<UpdateAppointmentRequest> updateValidator,
+            IAuthorizationService authorizationService)                 // ← 🆕
         {
             _service = service;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
+            _authorizationService = authorizationService;               // ← 🆕
         }
 
         [HttpGet("All", Name = "GetAllAppointments")]
@@ -40,10 +43,19 @@ namespace Clinic_API.Controllers
 
         [HttpGet("{id}", Name = "GetAppointmentById")]
         [ProducesResponseType(typeof(AppointmentResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]          // ← 🆕
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _service.GetByIdAsync(id);
+
+            // ✅ Ownership Check
+            var authResult = await _authorizationService.AuthorizeAsync(
+                User, result.DoctorId, "SameDoctor");
+
+            if (!authResult.Succeeded)
+                return Forbid();
+
             return Ok(result);
         }
 
@@ -57,8 +69,16 @@ namespace Clinic_API.Controllers
 
         [HttpGet("ByDoctor/{doctorId}/ByDate", Name = "GetAppointmentsByDoctorAndDate")]
         [ProducesResponseType(typeof(IEnumerable<AppointmentResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]          // ← 🆕
         public async Task<IActionResult> GetByDoctorAndDate(int doctorId, [FromQuery] DateTime date)
         {
+            // ✅ Ownership Check — الدكتور يبعت الـ doctorId بتاعه بس
+            var authResult = await _authorizationService.AuthorizeAsync(
+                User, doctorId, "SameDoctor");
+
+            if (!authResult.Succeeded)
+                return Forbid();
+
             var result = await _service.GetByDoctorAndDateAsync(doctorId, date);
             return Ok(result);
         }
@@ -87,6 +107,7 @@ namespace Clinic_API.Controllers
         [HttpPut("{id}", Name = "UpdateAppointment")]
         [ProducesResponseType(typeof(AppointmentResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]          // ← 🆕
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateAppointmentRequest request)
@@ -95,6 +116,15 @@ namespace Clinic_API.Controllers
             if (!validation.IsValid)
                 return BadRequest(new { errors = validation.Errors.Select(e => e.ErrorMessage) });
 
+            // ✅ Ownership Check
+            var appointment = await _service.GetByIdAsync(id);
+
+            var authResult = await _authorizationService.AuthorizeAsync(
+                User, appointment.DoctorId, "SameDoctor");
+
+            if (!authResult.Succeeded)
+                return Forbid();
+
             var result = await _service.UpdateAsync(id, request);
             return Ok(result);
         }
@@ -102,10 +132,20 @@ namespace Clinic_API.Controllers
         [HttpPatch("{id}/Cancel", Name = "CancelAppointment")]
         [ProducesResponseType(typeof(AppointmentResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]          // ← 🆕
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Cancel(int id)
         {
+            // ✅ Ownership Check
+            var appointment = await _service.GetByIdAsync(id);
+
+            var authResult = await _authorizationService.AuthorizeAsync(
+                User, appointment.DoctorId, "SameDoctor");
+
+            if (!authResult.Succeeded)
+                return Forbid();
+
             var result = await _service.CancelAsync(id);
             return Ok(result);
         }

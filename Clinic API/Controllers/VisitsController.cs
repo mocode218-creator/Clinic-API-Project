@@ -10,13 +10,14 @@ namespace Clinic_API.Controllers
     [ApiController]
     [Route("api/v1/Visits")]
     [Produces("application/json")]
-    [Authorize]
+    [Authorize(Roles = "Admin,Doctor")]
     public class VisitsController : ControllerBase
     {
 
         private readonly IVisitService _service;
         private readonly IValidator<CreateVisitRequest> _createValidator;
         private readonly IValidator<UpdateVisitRequest> _updateValidator;
+
 
         public VisitsController(
             IVisitService service,

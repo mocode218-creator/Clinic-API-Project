@@ -10,7 +10,7 @@ namespace Clinic_API.Controllers
     [ApiController]
     [Route("api/v1/Payments")]
     [Produces("application/json")]
-    [Authorize]
+    [Authorize(Roles = "Admin,Receptionist")]
     public class PaymentsController : ControllerBase
     {
         private readonly IPaymentService _service;

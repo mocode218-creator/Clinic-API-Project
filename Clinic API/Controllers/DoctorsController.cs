@@ -16,15 +16,18 @@ namespace Clinic_API.Controllers
         private readonly IDoctorService _service;
         private readonly IValidator<CreateDoctorRequest> _createValidator;
         private readonly IValidator<UpdateDoctorRequest> _updateValidator;
+        private readonly IAuthorizationService _authorizationService;
 
         public DoctorsController(
             IDoctorService service,
             IValidator<CreateDoctorRequest> createValidator,
-            IValidator<UpdateDoctorRequest> updateValidator)
+            IValidator<UpdateDoctorRequest> updateValidator,
+            IAuthorizationService authorizationService)
         {
             _service = service;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
+            _authorizationService = authorizationService;
         }
 
         [HttpGet("All", Name = "GetAllDoctors")]
@@ -70,6 +73,7 @@ namespace Clinic_API.Controllers
         [HttpPut("{id}", Name = "UpdateDoctor")]
         [ProducesResponseType(typeof(DoctorResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]          // ← 🆕
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateDoctorRequest request)
@@ -77,6 +81,13 @@ namespace Clinic_API.Controllers
             var validation = await _updateValidator.ValidateAsync(request);
             if (!validation.IsValid)
                 return BadRequest(new { errors = validation.Errors.Select(e => e.ErrorMessage) });
+
+            // ✅ Ownership Check — Doctor يعدّل بياناته بس
+            var authResult = await _authorizationService.AuthorizeAsync(
+                User, id, "SameDoctor");
+
+            if (!authResult.Succeeded)
+                return Forbid();
 
             var result = await _service.UpdateAsync(id, request);
             return Ok(result);

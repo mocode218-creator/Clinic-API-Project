@@ -10,7 +10,7 @@ namespace Clinic_API.Controllers
     [ApiController]
     [Route("api/v1/Prescriptions")]
     [Produces("application/json")]
-    [Authorize]
+    [Authorize(Roles = "Admin,Doctor")]
     public class PrescriptionsController : ControllerBase
     {
 

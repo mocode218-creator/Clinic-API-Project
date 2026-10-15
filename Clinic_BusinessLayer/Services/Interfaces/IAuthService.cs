@@ -7,5 +7,7 @@ namespace Clinic_BusinessLayer.Services.Interfaces
     {
         Task<AuthResponse> LoginAsync(LoginRequest request);
         Task<AuthResponse> RegisterAsync(RegisterRequest request);
+        Task<AuthResponse> RefreshTokenAsync(RefreshTokenRequest request);   // ← 🆕
+        Task LogoutAsync(LogoutRequest request);                             // ← 🆕
     }
 }

@@ -38,6 +38,8 @@ public partial class ClinicDbContext : DbContext
 
     public virtual DbSet<PrescriptionItem> PrescriptionItems { get; set; }
 
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<Specialization> Specializations { get; set; }
@@ -539,6 +541,39 @@ public partial class ClinicDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Visits_Appointments");
         });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.ToTable("RefreshTokens");
+
+            entity.HasIndex(e => e.Token, "IX_RefreshTokens_Token");
+            entity.HasIndex(e => e.UserId, "IX_RefreshTokens_UserId");
+
+            entity.Property(e => e.CreatedAt)
+                .HasPrecision(3)
+                .HasDefaultValueSql("(sysutcdatetime())", "DF_RefreshTokens_CreatedAt");
+
+            entity.Property(e => e.ExpiresAt)
+                .HasPrecision(3);
+
+            entity.Property(e => e.RevokedAt)
+                .HasPrecision(3);
+
+            entity.Property(e => e.ReplacedByToken)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+
+            entity.Property(e => e.Token)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.User).WithMany(p => p.RefreshTokens)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_RefreshTokens_Users");
+        });
+
+
 
         OnModelCreatingPartial(modelBuilder);
     }

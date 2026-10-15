@@ -8,7 +8,7 @@ namespace Clinic_API.Controllers
     [ApiController]
     [Route("api/v1/Invoices")]
     [Produces("application/json")]
-    [Authorize]
+    [Authorize(Roles = "Admin,Receptionist")]
     public class InvoicesController : ControllerBase
     {
         private readonly IInvoiceService _service;

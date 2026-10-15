@@ -46,5 +46,15 @@ namespace Clinic_DataAccess.Repositories.Implementations
         }
 
 
+
+        public async Task<Doctor?> GetByPersonIdAsync(int personId)
+        {
+            return await _dbSet
+                .Include(d => d.Person)
+                .Include(d => d.Specialization)
+                .FirstOrDefaultAsync(d => d.PersonId == personId && d.DeletedAt == null);
+        }
+
+
     }
 }

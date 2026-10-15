@@ -16,15 +16,18 @@ namespace Clinic_API.Controllers
         private readonly IUserService _service;
         private readonly IValidator<CreateUserRequest> _createValidator;
         private readonly IValidator<UpdateUserRequest> _updateValidator;
+        private readonly IAuthorizationService _authorizationService;   // ← 🆕
 
         public UsersController(
             IUserService service,
             IValidator<CreateUserRequest> createValidator,
-            IValidator<UpdateUserRequest> updateValidator)
+            IValidator<UpdateUserRequest> updateValidator,
+            IAuthorizationService authorizationService)                 // ← 🆕
         {
             _service = service;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
+            _authorizationService = authorizationService;
         }
 
         [HttpGet("All", Name = "GetAllUsers")]
@@ -35,6 +38,8 @@ namespace Clinic_API.Controllers
             return Ok(result);
         }
 
+        // ⚠️ ملاحظة: Admin بس يقدر يشوف أي User
+        // Self Ownership هيتم تفعيلها لو سيبنا [Authorize] بدون Roles
         [HttpGet("{id}", Name = "GetUserById")]
         [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
