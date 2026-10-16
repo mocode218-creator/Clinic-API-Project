@@ -254,16 +254,6 @@ Clinic API Project/
 └── README.md
 ```
 
-## Roadmap
-
-- [x] Core API (patients, doctors, appointments, visits, prescriptions, billing)
-- [x] JWT authentication with refresh tokens
-- [x] Role-based and ownership authorization
-- [x] Rate limiting
-- [ ] Audit log population
-- [ ] Unit and integration tests
-- [ ] Docker support
-- [ ] CI/CD pipeline
 
 ## License
 
@@ -273,3 +263,4 @@ Released under the MIT License. See [LICENSE](LICENSE).
 
 - GitHub: https://github.com/mocode218-creator
 - LinkedIn: https://www.linkedin.com/in/moamen-mohamed-0bb938328
+- Gmail: mocode218@gmail.com
