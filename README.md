@@ -17,7 +17,6 @@ A RESTful back-end for running a small-to-medium clinic: patients, doctors, appo
 - [Security](#security)
 - [Business Rules](#business-rules)
 - [Project Structure](#project-structure)
-- [Roadmap](#roadmap)
 - [License](#license)
 - [Author](#author)
 
